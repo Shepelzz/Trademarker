@@ -53,7 +53,7 @@ public class TrademarkCommand implements CommandExecutor {
         ArrayList<String> lore;
 
         switch(args[0]) {
-            case "remove":
+            case "removelicense":
                 if (!isTrademarkedMap(item)){
                     player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.remove_no_trademark")));
                     break;
@@ -76,31 +76,7 @@ public class TrademarkCommand implements CommandExecutor {
 
                 player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_removed")));
                 break;
-//            case "add":
-//
-//                if (isTrademarkedMap(item)) {
-//                    player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.cant_trademark")));
-//                    break;
-//                }
-//
-//                //lore
-//                lore = new ArrayList<>();
-//                String trademark = main.getConfig().getString("lang.trademark_format");
-//                trademark = trademark.replace("%player%",player.getName());
-//                trademark = Trademarker.colorCode(trademark);
-//                lore.add(trademark);
-//                meta.setLore(lore);
-//
-//
-//                //metadata
-//                String uuid = player.getUniqueId().toString();
-//                meta.getPersistentDataContainer().set(TRADEMARK_OWNER_KEY, PersistentDataType.STRING, uuid);
-//
-//                item.setItemMeta(meta);
-//
-//                player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_added")));
-//                break;
-            case "add": {
+            case "addlicense": {
                 if (isTrademarkedMap(item)) {
                     player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.cant_trademark")));
                     break;
@@ -113,7 +89,6 @@ public class TrademarkCommand implements CommandExecutor {
 
                     // Check if player has enough money
                     if (economy.has(player, trademarkCost)) {
-                        // Deduct the payment
                         economy.withdrawPlayer(player, trademarkCost);
 
                         // Proceed with adding trademark
@@ -143,7 +118,7 @@ public class TrademarkCommand implements CommandExecutor {
                 }
                 break;
             }
-            case "watermark":
+            case "addwatermark":
                 if(!player.hasPermission("trademarker.watermark")){
                     player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.no_perms")));
                     return true;
@@ -159,21 +134,41 @@ public class TrademarkCommand implements CommandExecutor {
                     break;
                 }
 
-                MapView view = meta.getMapView();
-                String posx = "";
-                String posy = "";
+                // Check if Vault is enabled
+                if (Bukkit.getServer().getServicesManager().isProvidedFor(Economy.class)) {
+                    Economy economy = Bukkit.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+                    double watermarkCost = main.getConfig().getDouble("eco.watermark_cost");
 
-                if(args.length>1){
-                    posy = args[1];
-                    if(args.length>2){
-                        posx = args[2];
+                    // Check if player has enough money
+                    if (economy.has(player, watermarkCost)) {
+                        economy.withdrawPlayer(player, watermarkCost);
+
+                        // Proceed with adding watermark
+                        MapView view = meta.getMapView();
+                        String posx = "";
+                        String posy = "";
+
+                        if(args.length>1){
+                            posy = args[1];
+                            if(args.length>2){
+                                posx = args[2];
+                            }
+                        }
+
+                        view.addRenderer(new WatermarkRenderer(player.getName(),posx,posy));
+
+                        player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.watermark_added")));
+                        String ecoWithdrawOperationText = main.getConfig().getString("lang.eco_withdraw_operation");
+                        ecoWithdrawOperationText = ecoWithdrawOperationText.replace("%amount%", String.valueOf(watermarkCost));
+                        player.sendMessage(Trademarker.colorCode(ecoWithdrawOperationText));
+                    } else {
+                        // Player doesn't have enough money
+                        player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.not_enough_money")));
                     }
+                } else {
+                    // Vault or an economy plugin is not installed
+                    player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.eco_not_found")));
                 }
-
-                view.addRenderer(new WatermarkRenderer(player.getName(),posx,posy));
-
-                player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.watermark_added")));
-
                 break;
         }
 

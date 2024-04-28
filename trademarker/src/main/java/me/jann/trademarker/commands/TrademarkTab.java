@@ -14,15 +14,15 @@ public class TrademarkTab implements TabCompleter {
         List<String> poscompl = new ArrayList<>();
 
         if(args.length == 1){
-            completions.add("add");
-            completions.add("remove");
-            if(sender.hasPermission("trademarker.watermark")) completions.add("watermark");
+            completions.add("addlicense");
+            completions.add("removelicense");
+            if(sender.hasPermission("trademarker.watermark")) completions.add("addwatermark");
             poscompl.addAll(completions);
             poscompl.removeIf(s -> !s.startsWith(args[0]));
         }
 
         if(args.length == 2){
-            if(args[0].equals("watermark")){
+            if(args[0].equals("addwatermark")){
                 completions.add("top");
                 completions.add("bottom");
             }
@@ -31,7 +31,7 @@ public class TrademarkTab implements TabCompleter {
         }
 
         if(args.length == 3){
-            if(args[0].equals("watermark")){
+            if(args[0].equals("addwatermark")){
                 completions.add("left");
                 completions.add("middle");
                 completions.add("right");

@@ -16,5 +16,5 @@ lang:
 
 eco:
   add_cost: 50
-  remove_cost: 10
-  watermark_cost: 80
+  remove_cost: 0
+  watermark_cost: 10

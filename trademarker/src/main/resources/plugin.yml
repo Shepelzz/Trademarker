@@ -6,6 +6,6 @@ commands:
   trademark:
     description: Trademark maps
     aliases:
-      - trm
+      - map
   trademarkreload:
     description: reloads plugin
