@@ -10,3 +10,11 @@ lang:
   watermark_added: "&aWatermark added."
   no_perms: "&cYou don't have permission to use this command."
   trademark_format: "&cBy %player%"
+  not_enough_money: "&cYou don't have enough money to do this operation."
+  eco_not_found: "&cVault or an economy plugin is not installed on the server."
+  eco_withdraw_operation: "&aWithdrawed %amount% coins from your account."
+
+eco:
+  add_cost: 50
+  remove_cost: 10
+  watermark_cost: 80

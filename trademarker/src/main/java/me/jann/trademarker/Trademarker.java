@@ -2,7 +2,6 @@ package me.jann.trademarker;
 
 import me.jann.trademarker.commands.ReloadCommand;
 import me.jann.trademarker.commands.TrademarkCommand;
-import me.jann.trademarker.commands.TrademarkTab;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -87,7 +86,7 @@ public final class Trademarker extends JavaPlugin implements Listener {
 
         this.getServer().getPluginManager().registerEvents(new CopyEvents(this), this);
         getCommand("trademark").setExecutor(new TrademarkCommand(this));
-        getCommand("trademark").setTabCompleter(new TrademarkTab());
+//        getCommand("trademark").setTabCompleter(new TrademarkTab());
         getCommand("trademarkreload").setExecutor(new ReloadCommand(this));
     }
 

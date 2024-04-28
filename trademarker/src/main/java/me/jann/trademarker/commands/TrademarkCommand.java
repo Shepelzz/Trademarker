@@ -2,6 +2,8 @@ package me.jann.trademarker.commands;
 
 import me.jann.trademarker.Trademarker;
 import me.jann.trademarker.WatermarkRenderer;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -12,8 +14,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static me.jann.trademarker.Trademarker.*;
 
@@ -72,30 +76,73 @@ public class TrademarkCommand implements CommandExecutor {
 
                 player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_removed")));
                 break;
-            case "add":
-
+//            case "add":
+//
+//                if (isTrademarkedMap(item)) {
+//                    player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.cant_trademark")));
+//                    break;
+//                }
+//
+//                //lore
+//                lore = new ArrayList<>();
+//                String trademark = main.getConfig().getString("lang.trademark_format");
+//                trademark = trademark.replace("%player%",player.getName());
+//                trademark = Trademarker.colorCode(trademark);
+//                lore.add(trademark);
+//                meta.setLore(lore);
+//
+//
+//                //metadata
+//                String uuid = player.getUniqueId().toString();
+//                meta.getPersistentDataContainer().set(TRADEMARK_OWNER_KEY, PersistentDataType.STRING, uuid);
+//
+//                item.setItemMeta(meta);
+//
+//                player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_added")));
+//                break;
+            case "add": {
                 if (isTrademarkedMap(item)) {
                     player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.cant_trademark")));
                     break;
                 }
 
-                //lore
-                lore = new ArrayList<>();
-                String trademark = main.getConfig().getString("lang.trademark_format");
-                trademark = trademark.replace("%player%",player.getName());
-                trademark = Trademarker.colorCode(trademark);
-                lore.add(trademark);
-                meta.setLore(lore);
+                // Check if Vault is enabled
+                if (Bukkit.getServer().getServicesManager().isProvidedFor(Economy.class)) {
+                    Economy economy = Bukkit.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+                    double trademarkCost = main.getConfig().getDouble("eco.add_cost");
 
+                    // Check if player has enough money
+                    if (economy.has(player, trademarkCost)) {
+                        // Deduct the payment
+                        economy.withdrawPlayer(player, trademarkCost);
 
-                //metadata
-                String uuid = player.getUniqueId().toString();
-                meta.getPersistentDataContainer().set(TRADEMARK_OWNER_KEY, PersistentDataType.STRING, uuid);
+                        // Proceed with adding trademark
+                        lore = new ArrayList<>();
+                        String trademark = main.getConfig().getString("lang.trademark_format");
+                        trademark = trademark.replace("%player%", player.getName());
+                        trademark = Trademarker.colorCode(trademark);
+                        lore.add(trademark);
+                        meta.setLore(lore);
 
-                item.setItemMeta(meta);
+                        String uuid = player.getUniqueId().toString();
+                        meta.getPersistentDataContainer().set(TRADEMARK_OWNER_KEY, PersistentDataType.STRING, uuid);
 
-                player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_added")));
+                        item.setItemMeta(meta);
+
+                        player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.trademark_added")));
+                        String ecoWithdrawOperationText = main.getConfig().getString("lang.eco_withdraw_operation");
+                        ecoWithdrawOperationText = ecoWithdrawOperationText.replace("%amount%", String.valueOf(trademarkCost));
+                        player.sendMessage(Trademarker.colorCode(ecoWithdrawOperationText));
+                    } else {
+                        // Player doesn't have enough money
+                        player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.not_enough_money")));
+                    }
+                } else {
+                    // Vault or an economy plugin is not installed
+                    player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.eco_not_found")));
+                }
                 break;
+            }
             case "watermark":
                 if(!player.hasPermission("trademarker.watermark")){
                     player.sendMessage(Trademarker.colorCode(main.getConfig().getString("lang.no_perms")));
